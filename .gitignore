@@ -1,0 +1,37 @@
+# Synology
+@eaDir/
+**/@eaDir/
+
+# Backups
+.bak/
+*.bak
+*.bak.yml
+
+# Environment files
+.env
+*.env
+
+# Data / runtime
+data/
+
+# Docker compose (deployment-specific)
+docker-compose.yml
+docker-compose.bak.yml
+1panel.env
+
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Build output
+build/
+dist/
+client/build/
+
+# Logs
+npm-debug.log*
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

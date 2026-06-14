@@ -4,6 +4,7 @@ import { SnippetGrid } from '../components/Snippets/SnippetGrid';
 import { Button, Card, EmptyState, Layout } from '../components/UI';
 
 type SortBy = 'updated' | 'created';
+type SortDir = 'desc' | 'asc';
 
 export const Snippets = (): JSX.Element => {
   const { snippets, tagCount, getSnippets, countTags } =
@@ -11,6 +12,7 @@ export const Snippets = (): JSX.Element => {
 
   const [filter, setFilter] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('updated');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   useEffect(() => {
     getSnippets();
@@ -23,22 +25,28 @@ export const Snippets = (): JSX.Element => {
       ? snippets.filter(s => s.tags.includes(filter))
       : snippets;
 
+    // Comparators are written newest-first (descending); `dir` flips them to
+    // oldest-first (ascending) when requested.
+    const dir = sortDir === 'asc' ? -1 : 1;
+
     return [...base].sort((a, b) => {
       if (sortBy === 'created') {
         return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          dir * (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         );
       }
 
-      // Default: most recently updated first, then most recently created.
+      // By last updated, with most recently created as the tiebreaker.
       const byUpdated =
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      const cmp =
+        byUpdated !== 0
+          ? byUpdated
+          : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
-      return byUpdated !== 0
-        ? byUpdated
-        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return dir * cmp;
     });
-  }, [snippets, filter, sortBy]);
+  }, [snippets, filter, sortBy, sortDir]);
 
   const filterHandler = (tag: string) => {
     setFilter(tag);
@@ -100,12 +108,22 @@ export const Snippets = (): JSX.Element => {
               </label>
               <select
                 id='sortSnippets'
-                className='form-select form-select-sm w-auto'
+                className='form-select form-select-sm w-auto me-2'
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as SortBy)}
               >
                 <option value='updated'>Last updated</option>
                 <option value='created'>Date created</option>
+              </select>
+              <select
+                id='sortDir'
+                className='form-select form-select-sm w-auto'
+                value={sortDir}
+                onChange={e => setSortDir(e.target.value as SortDir)}
+                aria-label='Sort direction'
+              >
+                <option value='desc'>Recent first</option>
+                <option value='asc'>Oldest first</option>
               </select>
             </div>
             <SnippetGrid snippets={displaySnippets} />

@@ -258,11 +258,16 @@ export const searchSnippets = asyncWrapper(
       return;
     }
 
+    // Case-insensitive language/tag matching (SQLite LIKE is case-insensitive
+    // for ASCII). OR of LIKE per value works for multi-value filters; values
+    // contain no wildcards so each LIKE is a whole-string match. (cf. PR #64)
     const languageFilter = languages.length
-      ? { [Op.in]: languages }
+      ? { [Op.or]: languages.map(language => ({ [Op.like]: language })) }
       : { [Op.notIn]: languages };
 
-    const tagFilter = tags.length ? { [Op.in]: tags } : { [Op.notIn]: tags };
+    const tagFilter = tags.length
+      ? { [Op.or]: tags.map(tag => ({ [Op.like]: tag })) }
+      : { [Op.notIn]: tags };
 
     const snippets = await SnippetModel.findAll({
       where: {

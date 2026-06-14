@@ -1,34 +1,51 @@
-import { useEffect, useContext, useState, Fragment } from 'react';
+import { useEffect, useContext, useState, useMemo, Fragment } from 'react';
 import { SnippetsContext } from '../store';
 import { SnippetGrid } from '../components/Snippets/SnippetGrid';
 import { Button, Card, EmptyState, Layout } from '../components/UI';
-import { Snippet } from '../typescript/interfaces';
+
+type SortBy = 'updated' | 'created';
 
 export const Snippets = (): JSX.Element => {
   const { snippets, tagCount, getSnippets, countTags } =
     useContext(SnippetsContext);
 
   const [filter, setFilter] = useState<string | null>(null);
-  const [localSnippets, setLocalSnippets] = useState<Snippet[]>([]);
+  const [sortBy, setSortBy] = useState<SortBy>('updated');
 
   useEffect(() => {
     getSnippets();
     countTags();
   }, []);
 
-  useEffect(() => {
-    setLocalSnippets([...snippets]);
-  }, [snippets]);
+  // Derive the displayed list from snippets + active tag filter + sort option.
+  const displaySnippets = useMemo(() => {
+    const base = filter
+      ? snippets.filter(s => s.tags.includes(filter))
+      : snippets;
+
+    return [...base].sort((a, b) => {
+      if (sortBy === 'created') {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
+
+      // Default: most recently updated first, then most recently created.
+      const byUpdated =
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+
+      return byUpdated !== 0
+        ? byUpdated
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [snippets, filter, sortBy]);
 
   const filterHandler = (tag: string) => {
     setFilter(tag);
-    const filteredSnippets = snippets.filter(s => s.tags.includes(tag));
-    setLocalSnippets(filteredSnippets);
   };
 
   const clearFilterHandler = () => {
     setFilter(null);
-    setLocalSnippets([...snippets]);
   };
 
   return (
@@ -77,7 +94,21 @@ export const Snippets = (): JSX.Element => {
             </Card>
           </div>
           <div className='col-12 col-md-8 col-lg-9'>
-            <SnippetGrid snippets={localSnippets} />
+            <div className='d-flex justify-content-end align-items-center mb-3'>
+              <label htmlFor='sortSnippets' className='me-2 text-muted'>
+                Sort by
+              </label>
+              <select
+                id='sortSnippets'
+                className='form-select form-select-sm w-auto'
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as SortBy)}
+              >
+                <option value='updated'>Last updated</option>
+                <option value='created'>Date created</option>
+              </select>
+            </div>
+            <SnippetGrid snippets={displaySnippets} />
           </div>
         </Fragment>
       )}

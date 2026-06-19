@@ -1,0 +1,15 @@
+[project]
+name = "snippet-box-mcp"
+version = "0.1.0"
+description = "FastMCP server + front-door proxy for a Snippet Box instance"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.11.0",
+    "httpx>=0.27",
+    "starlette>=0.37",
+    "uvicorn>=0.30",
+]
+
+[tool.uv]
+# Not an installable package — just an app entrypoint (server.py).
+package = false

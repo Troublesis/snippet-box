@@ -1,0 +1,17 @@
+# One host port (10032) fronts both services:
+#   /mcp*  -> FastMCP server (snippet CRUD over MCP streamable HTTP)
+#   /*     -> Snippet Box web UI + REST API
+#
+# HTTP-only on :80 (internal LAN); TLS is handled upstream by 1Panel/your NAS.
+:80 {
+	handle /mcp* {
+		# flush_interval -1 = stream immediately (MCP uses SSE / chunked responses).
+		reverse_proxy snippet-mcp:8000 {
+			flush_interval -1
+		}
+	}
+
+	handle {
+		reverse_proxy snippet-box:5000
+	}
+}

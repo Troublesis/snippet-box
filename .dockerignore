@@ -1,4 +1,42 @@
-node_modules/
-build/
-data/
+# --- Snippet Box build context (repo root) ---------------------------------
+# Keep the image limited to the app source. Everything below is either a
+# different service, persistent data, a secret, or regenerated inside the image.
+
+# Git
 .git
+.gitignore
+
+# Other services / deployment artifacts (not part of the app image)
+mcp/
+Caddyfile
+docker-compose.yml
+docker-compose.example.yml
+docker-compose.bak.yml
+app/
+
+# Secrets / deployment env
+1panel.env
+*.env.local
+
+# Persistent data & backups
+data/
+.bak/
+*.bak
+*.bak.yml
+
+# Synology
+@eaDir/
+**/@eaDir/
+
+# Dependencies & build output (reinstalled / rebuilt in the image)
+node_modules/
+client/node_modules/
+build/
+client/build/
+
+# Docs / CI assets (not needed at runtime)
+.github/
+
+# OS cruft
+.DS_Store
+Thumbs.db

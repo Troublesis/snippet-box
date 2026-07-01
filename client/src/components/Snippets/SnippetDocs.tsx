@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 import { Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Mermaid } from './Mermaid';
 
 interface Props {
@@ -21,13 +22,20 @@ const components: Components = {
         {children}
       </code>
     );
+  },
+  // Apply Bootstrap's `.table` class to GFM tables so they pick up the
+  // bootswatch theme styling defined in _bootswatch.scss.
+  table({ node, ...props }) {
+    return <table className="table" {...props} />;
   }
 };
 
 export const SnippetDocs = (props: Props): JSX.Element => {
   return (
-    <div>
-      <ReactMarkdown components={components}>{props.markdown}</ReactMarkdown>
+    <div className="snippet-docs">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {props.markdown}
+      </ReactMarkdown>
     </div>
   );
 };

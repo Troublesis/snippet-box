@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const SnippetCard = (props: Props): JSX.Element => {
-  const { title, description, language, code, id, createdAt, isPinned } =
+  const { title, description, language, code, docs, id, createdAt, isPinned } =
     props.snippet;
   const { setSnippet } = useContext(SnippetsContext);
 
@@ -60,6 +60,16 @@ export const SnippetCard = (props: Props): JSX.Element => {
               }}
             />
           </Link>
+          {docs && (
+            <Button
+              text='Copy doc'
+              color='secondary'
+              small
+              outline
+              classes='me-2'
+              handler={() => copy(docs)}
+            />
+          )}
           <Button
             text='Copy code'
             color='secondary'

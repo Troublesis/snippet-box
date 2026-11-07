@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { SnippetsContext } from '../../store';
 import { NewSnippet } from '../../typescript/interfaces';
+import copy from 'clipboard-copy';
 import { Button, Card } from '../UI';
 
 interface Props {
@@ -166,7 +167,16 @@ export const SnippetForm = (props: Props): JSX.Element => {
             <hr />
 
             {/* DOCS SECTION */}
-            <h5 className='card-title mb-3'>Snippet documentation</h5>
+            <div className='d-flex align-items-center justify-content-between mb-3'>
+              <h5 className='card-title mb-0'>Snippet documentation</h5>
+              <Button
+                text='Copy doc'
+                color='secondary'
+                small
+                outline
+                handler={() => copy(formData.docs ?? '')}
+              />
+            </div>
             <div className='mb-3'>
               <textarea
                 className='form-control'

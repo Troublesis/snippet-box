@@ -1,8 +1,14 @@
 import { useRef, useEffect, KeyboardEvent, useContext } from 'react';
 import { SnippetsContext } from '../store';
+import { SearchOptions } from '../typescript/interfaces';
 import { searchParser } from '../utils';
 
-export const SearchBar = (): JSX.Element => {
+interface Props {
+  options: SearchOptions;
+}
+
+export const SearchBar = (props: Props): JSX.Element => {
+  const { options } = props;
   const { searchSnippets } = useContext(SnippetsContext);
   const inputRef = useRef<HTMLInputElement>(document.createElement('input'));
 
@@ -10,14 +16,21 @@ export const SearchBar = (): JSX.Element => {
     inputRef.current.focus();
   }, [inputRef]);
 
+  // Re-run the current query when the scope / lazy option changes
+  useEffect(() => {
+    if (inputRef.current.value.trim()) {
+      searchSnippets(searchParser(inputRef.current.value), options);
+    }
+  }, [options.scope, options.lazy]);
+
   const inputHandler = (e: KeyboardEvent<HTMLInputElement>) => {
     const query = searchParser(inputRef.current.value);
 
     if (e.key === 'Enter') {
-      searchSnippets(query);
+      searchSnippets(query, options);
     } else if (e.key === 'Escape') {
       inputRef.current.value = '';
-      searchSnippets(searchParser(inputRef.current.value));
+      searchSnippets(searchParser(inputRef.current.value), options);
     }
   };
 

@@ -20,6 +20,7 @@ export const SnippetDetails = (props: Props): JSX.Element => {
     updatedAt,
     description,
     code,
+    docs,
     id,
     isPinned
   } = props.snippet;
@@ -107,6 +108,16 @@ export const SnippetDetails = (props: Props): JSX.Element => {
             copy(rawUrl);
           }}
         />
+
+        {docs && (
+          <Button
+            text='Copy doc'
+            color='secondary'
+            small
+            outline
+            handler={() => copy(docs)}
+          />
+        )}
 
         <Button
           text='Copy code'

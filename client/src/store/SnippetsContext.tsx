@@ -1,13 +1,15 @@
 import { useState, createContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import { snippetSearch } from '../utils';
 import {
   Context,
   Snippet,
   Response,
   TagCount,
   NewSnippet,
-  SearchQuery
+  SearchQuery,
+  SearchOptions
 } from '../typescript/interfaces';
 
 export const SnippetsContext = createContext<Context>({
@@ -23,7 +25,7 @@ export const SnippetsContext = createContext<Context>({
   deleteSnippet: (id: number) => {},
   toggleSnippetPin: (id: number) => {},
   countTags: () => {},
-  searchSnippets: (query: SearchQuery) => {}
+  searchSnippets: (query: SearchQuery, options: SearchOptions) => {}
 });
 
 interface Props {
@@ -143,14 +145,12 @@ export const SnippetsContextProvider = (props: Props): JSX.Element => {
       .catch(err => redirectOnError());
   };
 
-  const searchSnippets = (query: SearchQuery): void => {
-    axios
-      .post<Response<Snippet[]>>('/api/snippets/search', query)
-      .then(res => {
-        setSearchResults(res.data.data);
-        console.log(res.data.data);
-      })
-      .catch(err => console.log(err));
+  // Search runs client-side: `snippets` already holds every field (code, docs,
+  // tags), so scoped/lazy matching needs no extra API round-trip.
+  const searchSnippets = (query: SearchQuery, options: SearchOptions): void => {
+    setSearchResults(
+      snippetSearch(snippets, query, options.scope, options.lazy)
+    );
   };
 
   const context = {
